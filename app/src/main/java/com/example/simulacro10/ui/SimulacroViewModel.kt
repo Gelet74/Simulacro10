@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.simulacro10.PlantillaAplicacion
 import com.example.simulacro10.datos.SimulacroApi
 import com.example.simulacro10.datos.SimulacroDatosBD
+import com.example.simulacro10.modelo.Serie
 import com.example.simulacro10.modelo.SimulacroBD
 import com.example.simulacro10.modelo.Usuario
 import kotlinx.coroutines.launch
@@ -39,39 +40,32 @@ sealed interface SimulacroUIStateApi {
     object Cargando: SimulacroUIStateApi
 }
 
+sealed interface SimulacroUIStateSeries {
+    data class Exito(val series: List<Serie>) : SimulacroUIStateSeries
+    object Error : SimulacroUIStateSeries
+    object Cargando : SimulacroUIStateSeries
+}
+
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 class PlantillaViewModel (
     private val plantillaRepositorioBD: SimulacroDatosBD,
     private val plantillaRepositorioAPI: SimulacroApi) : ViewModel() {
 
-    var bdUIState : SimulacroUIStateBD by mutableStateOf(SimulacroUIStateBD.Cargando)
-    var apiUIState : SimulacroUIStateApi by mutableStateOf(SimulacroUIStateApi.Cargando)
+    var bdUIState: SimulacroUIStateBD by mutableStateOf(SimulacroUIStateBD.Cargando)
+    var apiUIState: SimulacroUIStateApi by mutableStateOf(SimulacroUIStateApi.Cargando)
+    var apiUIStateSerie: SimulacroUIStateSeries by mutableStateOf(SimulacroUIStateSeries.Cargando)
+
 
     init {
         obtenerUsuario()
     }
 
-    fun obtenerUsuario(){
-        viewModelScope.launch{
+    fun obtenerUsuario() {
+        viewModelScope.launch {
             apiUIState = SimulacroUIStateApi.Cargando
             apiUIState = try {
                 val usuario = plantillaRepositorioAPI.obtenerUsuario()
                 SimulacroUIStateApi.ObtenerExitoUsuario(usuario = usuario)
-            }catch (e: IOException) {
-                SimulacroUIStateApi.Error
-            }catch (e: HttpException){
-                SimulacroUIStateApi.Error
-            }
-        }
-    }
-
-    fun actualizarUsuario(usuario: Usuario) {
-        viewModelScope.launch {
-            val id = usuario.id
-            apiUIState = SimulacroUIStateApi.Cargando
-            apiUIState = try {
-                val usuarioActualizado = plantillaRepositorioAPI.actualizarUsuario(id, usuario)
-                SimulacroUIStateApi.ActualizarExitoUsuario(usuarioActualizado)
             } catch (e: IOException) {
                 SimulacroUIStateApi.Error
             } catch (e: HttpException) {
@@ -80,27 +74,56 @@ class PlantillaViewModel (
         }
     }
 
-    fun obtenerSerieBD(id:Int) {
+    fun obtenerSeries() {
         viewModelScope.launch {
-            bdUIState = SimulacroUIStateBD.Cargando
-            bdUIState = try {
-                val serieBD = plantillaRepositorioBD.obtenerSerie(id)
-                SimulacroUIStateBD.ObtenerSerieExito(serieBD)
-            }catch (e: Exception) {
-                SimulacroUIStateBD.Error
+            apiUIStateSerie = SimulacroUIStateSeries.Cargando
+            apiUIStateSerie = try {
+                val serie = plantillaRepositorioAPI.obtenerSerie()
+                SimulacroUIStateSeries.Exito(series = serie)
+            } catch (e: IOException) {
+                SimulacroUIStateSeries.Error
+            } catch (e: HttpException) {
+                SimulacroUIStateSeries.Error
             }
         }
     }
 
-    companion object {
+        fun actualizarUsuario(usuario: Usuario) {
+            viewModelScope.launch {
+                val id = usuario.id
+                apiUIState = SimulacroUIStateApi.Cargando
+                apiUIState = try {
+                    val usuarioActualizado = plantillaRepositorioAPI.actualizarUsuario(id, usuario)
+                    SimulacroUIStateApi.ActualizarExitoUsuario(usuarioActualizado)
+                } catch (e: IOException) {
+                    SimulacroUIStateApi.Error
+                } catch (e: HttpException) {
+                    SimulacroUIStateApi.Error
+                }
+            }
+        }
 
+        fun obtenerSerieBD(id: Int) {
+            viewModelScope.launch {
+                bdUIState = SimulacroUIStateBD.Cargando
+                bdUIState = try {
+                    val serieBD = plantillaRepositorioBD.obtenerSerie(id)
+                    SimulacroUIStateBD.ObtenerSerieExito(serieBD)
+                } catch (e: Exception) {
+                    SimulacroUIStateBD.Error
+                }
+            }
+        }
+    companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val aplicacion = (this[APPLICATION_KEY] as PlantillaAplicacion)
                 val plantillaRepositorioBD = aplicacion.contenedor.simulacroRepositorioBD
                 val plantillaRepositorioAPI = aplicacion.contenedor.simulacroRepositorioApi
-                PlantillaViewModel(plantillaRepositorioBD= plantillaRepositorioBD, plantillaRepositorioAPI= plantillaRepositorioAPI)
+                PlantillaViewModel(plantillaRepositorioBD = plantillaRepositorioBD, plantillaRepositorioAPI = plantillaRepositorioAPI)
             }
         }
     }
 }
+
+

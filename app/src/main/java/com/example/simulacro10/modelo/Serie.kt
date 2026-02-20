@@ -10,7 +10,5 @@ data class Serie (
     @SerialName(value = "titulo")
     val titulo: String = "",
     @SerialName (value ="temporadas")
-    val temporadas: List<Int>,
-    @SerialName (value = "puntuacion")
-    val puntuacion: Int =0
+    val temporadas: Int = 0
 )

@@ -12,5 +12,5 @@ data class Usuario (
     @SerialName(value="fechanacimiento")
     val fechanacimiento: String ="",
     @SerialName(value="series")
-    val series: List<Serie>
+    val series: List<SerieUsuario>
 )

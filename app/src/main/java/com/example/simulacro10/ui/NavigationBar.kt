@@ -17,10 +17,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,6 +28,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.simulacro10.R
 import com.example.simulacro10.modelo.Ruta
 import com.example.simulacro10.ui.pantallas.PantallaPerfil
+import com.example.simulacro10.ui.pantallas.PantallaSeries
+import com.example.simulacro10.ui.pantallas.PantallaVer
 
 enum class PantallasBar(@StringRes val titulo: Int){
     Perfil(titulo= R.string.perfil),
@@ -76,13 +74,19 @@ fun PantallaPrincipal() {
             modifier = Modifier.padding(padding)
         ) {
             composable(PantallasBar.Perfil.name) {
-                PantallaPerfil(viewModel)
+                PantallaPerfil(
+                    apiUIState = viewModel.apiUIState,
+                    onUsuarioObtenido = { },
+                    onUsuarioPulsado= { }
+                )
             }
             composable(PantallasBar.Series.name) {
-                PantallaSeries(viewModel)
+                PantallaSeries()
             }
             composable(PantallasBar.Ver.name) {
-                PantallaVer(viewModel)
+                PantallaVer(apiUIStateSeries = viewModel.apiUIStateSerie,
+                            onCargarSeries ={viewModel.obtenerSeries()},
+                            onSeriePulsada =  {serie ->})
             }
         }
     }

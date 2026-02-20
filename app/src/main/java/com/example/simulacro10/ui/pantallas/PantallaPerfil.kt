@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.simulacro10.R
 import com.example.simulacro10.modelo.Usuario
+import com.example.simulacro10.ui.PlantillaViewModel
 import com.example.simulacro10.ui.SimulacroUIStateApi
 
 @Composable
@@ -33,10 +34,7 @@ fun PantallaPerfil (
             onUsuarioPulsado = onUsuarioPulsado,
             modifier = modifier.fillMaxWidth()
         )
-        is SimulacroUIStateApi.ObtenerExitoUsuario -> onUsuarioObtenido()
         is SimulacroUIStateApi.ActualizarExitoUsuario -> onUsuarioObtenido()
-
-        else -> Text(text= "PANTALLA DE PERFIL")
     }
 }
 
